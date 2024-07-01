@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>معاينة الإعلانات</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      width: 100%; /* يجعل الحاوية تمتد على الشاشة بالكامل */
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .ad {
+      border-bottom: 1px solid #ddd;
+      padding: 20px 0;
+      position: relative;
+      display: flex; /* تحويل الإعلان إلى عنصر مرن */
+      align-items: center; /* توسيط العناصر داخل الإعلان */
+    }
+    .ad img {
+      max-width: 100px; /* حجم الصورة حسب الحاجة */
+      height: auto;
+      margin-right: 20px; /* تباعد بين الصورة والنصوص */
+    }
+    .ad-info {
+      flex: 1; /* النصوص تمتد لتأخذ المساحة المتبقية */
+    }
+    .ad h2 {
+      margin-top: 0;
+      margin-bottom: 10px; /* تباعد بين العناوين */
+    }
+    .ad p {
+      margin: 5px 0;
+    }
+    .switch-container,
+    .edit-btn {
+      margin-top: 10px; /* تباعد بين الأزرار والإعلانات */
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .switch input {
+      display: none;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .edit-btn {
+      padding: 5px 10px;
+      background-color: #dbdcdd;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 60px;
+      height: 34px;
+      border-radius: 34px;
+      margin-left: 10px; /* تباعد بين الأزرار والإعلانات */
+    }
+    .edit-btn:hover {
+      background-color: #000;
+      color: #dbdcdd;
+    }
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px; /* ارتفاع العنصر المحتوي على الصورة */
+    }
+
+    /* تعديلات للتجاوب مع الشاشات الصغيرة (الهواتف) */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px; /* تقليل التباعد الداخلي للحاوية على الأجهزة الصغيرة */
+      }
+      .ad {
+        flex-direction: column; /* عرض الإعلان بشكل عمودي */
+        align-items: center; /* توسيط العناصر على الشاشات الصغيرة */
+        text-align: center; /* توسيط النصوص في حالة الشاشات الصغيرة */
+      }
+      .ad img {
+        margin-right: 0; /* إزالة التباعد بين الصورة والنصوص */
+        margin-bottom: 10px; /* تباعد بين الصورة والنصوص باتجاه الأسفل */
+      }
+      .switch {
+        margin-top: 10px; /* تباعد بين الأزرار */
+      }
+      .edit-btn {
+        margin-top: 10px; /* تباعد بين الأزرار */
+        margin-left: 0; /* إلغاء التباعد بين الزر والإعلان عندما يكون عرض الشاشة صغيرًا */
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="loading">
+    <img src="https://c.tenor.com/In8c2digq1MAAAAC/tenor.gif" alt="صورة انتظار">
+  </div>
+  
+  <div class="container" id="adsContainer" style="display: none;">
+    <!-- الإعلانات ستتم إضافتها هنا بواسطة JavaScript -->
+  </div>
+
+  <script>
+    // جلب البيانات من Google Sheets API
+    fetch('https://sheets.googleapis.com/v4/spreadsheets/1lVbvdEOsFkL9-agAS_EuS2mZn8Wd343Gw8uc8Pe4Bto/values/Dat!A1:E100?key=AIzaSyBhiqVypmyLHYPmqZYtvdSvxEopcLZBdYU')
+      .then(response => response.json())
+      .then(data => {
+        // إخفاء صورة الانتظار وعرض الإعلانات بعد استجابة البيانات
+        document.querySelector('.loading').style.display = 'none';
+        document.getElementById('adsContainer').style.display = 'block';
+
+        // تحويل البيانات إلى تنسيق مفيد
+        const values = data.values.slice(1); // تجاهل الصف الأول (العناوين)
+        const adsData = values.map(row => ({
+          date: row[0],
+          adsType: row[1],
+          imgUrl: row[2],
+          title: row[3],
+          subtitle: row[4],
+          active: true // يمكنك هنا إضافة خاصية active بناءً على احتياجاتك
+        }));
+
+        // عرض الإعلانات عند تحميل الصفحة
+        const adsContainer = document.getElementById('adsContainer');
+        adsData.forEach(ad => {
+          const adDiv = document.createElement('div');
+          adDiv.classList.add('ad');
+
+          const img = document.createElement('img');
+          img.src = `https://drive.google.com/thumbnail?id=${getDriveFileId(ad.imgUrl)}`;
+          img.alt = ad.adsType;
+          adDiv.appendChild(img);
+
+          const adInfoDiv = document.createElement('div');
+          adInfoDiv.classList.add('ad-info');
+
+          const h2 = document.createElement('h2');
+          h2.textContent = ad.title;
+          adInfoDiv.appendChild(h2);
+
+          const pSubtitle = document.createElement('p');
+          pSubtitle.textContent = ad.subtitle;
+          adInfoDiv.appendChild(pSubtitle);
+
+          adDiv.appendChild(adInfoDiv);
+
+          const switchContainer = document.createElement('div');
+          switchContainer.classList.add('switch-container');
+          const switchLabel = document.createElement('label');
+          switchLabel.classList.add('switch');
+          const switchInput = document.createElement('input');
+          switchInput.type = 'checkbox';
+          switchInput.checked = ad.active;
+          const slider = document.createElement('span');
+          slider.classList.add('slider');
+          switchLabel.appendChild(switchInput);
+          switchLabel.appendChild(slider);
+          switchContainer.appendChild(switchLabel);
+          adDiv.appendChild(switchContainer);
+
+          const editBtn = document.createElement('button');
+          editBtn.classList.add('edit-btn');
+          editBtn.textContent = 'تعديل';
+          editBtn.onclick = function() {
+            // يمكنك هنا إضافة السلوك عند النقر على زر التعديل
+            console.log('تم النقر على زر التعديل للإعلان:', ad);
+          };
+          adDiv.appendChild(editBtn);
+
+          adsContainer.appendChild(adDiv);
+        });
+      })
+      .catch(error => {
+        console.error('حدث خطأ أثناء جلب البيانات:', error);
+      });
+
+    // استخراج معرف الملف من رابط Google Drive
+    function getDriveFileId(url) {
+      const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        return match[1];
+      } else {
+        console.error('Invalid Google Drive URL:', url);
+        return '';
+      }
+    }
+  </script>
+</body>
+</html>
