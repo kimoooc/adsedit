@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>معاينة الإعلانات</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .ad {
+      border-bottom: 1px solid #ddd;
+      padding: 20px 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .ad img {
+      max-width: 100px;
+      height: auto;
+      margin-right: 20px;
+    }
+    .ad-info {
+      flex: 1;
+    }
+    .ad h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    .ad p {
+      margin: 5px 0;
+    }
+    .switch-container,
+    .edit-btn {
+      margin-top: 10px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .switch input {
+      display: none;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .edit-btn {
+      padding: 5px 10px;
+      background-color: #dbdcdd;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 60px;
+      height: 34px;
+      border-radius: 34px;
+      margin-left: 10px;
+    }
+    .edit-btn:hover {
+      background-color: #000;
+      color: #dbdcdd;
+    }
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      .ad {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .ad img {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+      .switch {
+        margin-top: 10px;
+      }
+      .edit-btn {
+        margin-top: 10px;
+        margin-left: 0;
+      }
+    }
+
+    .main-content {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 20px;
+      gap: 20px;
+    }
+    .column {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .column.main {
+      flex: 1 1 60%;
+    }
+    .column.secondary {
+      flex: 1 1 30%;
+    }
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+      }
+      .column.main, .column.secondary {
+        flex: 1 1 100%;
+      }
+    }
+    .form-label {
+      color: #333;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+    .form-input {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      text-align: right;
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .form-btn1 {
+      background-color: #f2ab19;
+      color: #080808;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 30%;
+    }
+    .form-btn1:hover {
+      background-color: #080808;
+      color: #f2ab19;
+    }
+    .custom-file-upload {
+      border: 1px solid #f2ab19;
+      color: #f2ab19;
+      background-color: #fff;
+      padding: 10px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: inline-block;
+      text-align: center;
+      margin-bottom: 20px;
+      width: 50%;
+    }
+    .custom-file-upload:hover {
+      background-color:#f2ab19;
+      color: #080808;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-image {
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+    }
+    #cover {
+      display: none;
+      position: fixed;
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(255, 255, 255, 0.8); 
+      z-index: 999;
+    }
+    #cover img {
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+    }
+    #processingMessage {
+      display: none; 
+      text-align: center; 
+      padding: 20px;
+    }
+    #successMessage {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    .success-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .success-buttons button {
+      background-color: #f2ab19;
+      color: #080808;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 30%;
+    }
+    .success-buttons button:hover {
+      background-color: #080808;
+      color: #f2ab19;
+    }
+    .preview {
+      color: black;
+      margin: 0px;
+      font-size: 13px;
+    }
+    .preview img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">
+    <img src="loading-icon.png" class="loading-image" id="loadingImage">
+  </div>
+
+  <div id="adsContainer" class="container" style="display: none;">
+    <!-- الإعلانات ستظهر هنا -->
+  </div>
+
+  <div id="mainContent" class="main-content" style="display: none;">
+        <div class="column main">
+            <form id="uploadForm" action="https://script.google.com/macros/s/AKfycby89lAVORRjYGseorTlOZXiH9w0Xv57K_Yf4BRrRJAK8Re5TBby6lNUqaI22PSTvzZS/exec" method="POST" style="color: white;margin-left: 5%;margin-right: 5%;margin-bottom: 60px;margin-top: 50px;text-align: right;z-index: 10;">
+                <input type="hidden" value="" name="fileContent" id="fileContent">
+                <input type="hidden" value="" name="filename" id="filename">
+                <div class="input-box">
+                    <label for="adsType" class="form-label">Ads</label>
+                    <select id="adsType" name="ads" class="form-input" required>
+                        <option value="ads 1">ads 1</option>
+                        <option value="ads 2">ads 2</option>
+                    </select>
+                </div>
+
+                <div class="input-box">
+                    <label for="nama" class="form-label">العنوان الرئيسي</label>
+                    <input type="text" id="nama" name="Title" class="form-input" placeholder="" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="nama" class="form-label">العنوان الفرعي</label>
+                    <input type="text" id="nama" name="Subtitle" class="form-input" placeholder="" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="image_uploads" class="custom-file-upload">
+                        اختر صورة الغلاف
+                    </label>
+                    <input type="file" id="image_uploads" name="image_uploads" accept=".jpg, .jpeg, .png" onchange="updateImageDisplay();" style="display: none;" required />
+                    <div class="preview">
+                        <p style="color: black;margin: 0px;font-size: 13px;">الصورة يجب أن تكون بصيغة PNG أو JPG</p>
+                    </div>
+                </div>
+
+                <div class="button" style="width: 100%;">
+                    <button class="form-btn1" type="button" id="submitButton" onclick="submitAndClearForm();">إرسال</button>
+                </div>
+            </form>
+
+            <div id="cover">
+                <img src="https://wa022.github.io/6/loading.gif" alt="Loading" class="loading-image">
+            </div>
+
+            <div id="processingMessage">
+                <p>جارٍ معالجة البيانات...</p>
+            </div>
+
+            <div id="successMessage">
+                <p>تم إرسال البيانات بنجاح!</p>
+                <div class="success-buttons">
+                    <button class="form-btn1" type="button" onclick="hideSuccessMessage();">إغلاق</button>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+
+
+  <script>
+    // جلب البيانات من Google Sheets API
+    fetch('https://sheets.googleapis.com/v4/spreadsheets/1lVbvdEOsFkL9-agAS_EuS2mZn8Wd343Gw8uc8Pe4Bto/values/Dat!A1:G100?key=AIzaSyBhiqVypmyLHYPmqZYtvdSvxEopcLZBdYU')
+      .then(response => response.json())
+      .then(data => {
+        // إخفاء صورة الانتظار وعرض الإعلانات بعد استجابة البيانات
+        document.querySelector('.loading').style.display = 'none';
+        document.getElementById('adsContainer').style.display = 'block';
+
+        // تحويل البيانات إلى تنسيق مفيد
+        const values = data.values.slice(1); // تجاهل الصف الأول (العناوين)
+        const adsData = values.map(row => ({
+          date: row[0],
+          adsType: row[1],
+          imgUrl: row[2],
+          title: row[3],
+          subtitle: row[4],
+          active: row[5] === 'active' // تحديد حالة الإعلان بناءً على قيمة "status"
+        }));
+
+        // عرض الإعلانات عند تحميل الصفحة
+        const adsContainer = document.getElementById('adsContainer');
+        adsData.forEach(ad => {
+          const adDiv = document.createElement('div');
+          adDiv.classList.add('ad');
+
+          const img = document.createElement('img');
+          img.src = `https://drive.google.com/thumbnail?id=${getDriveFileId(ad.imgUrl)}`;
+          img.alt = ad.adsType;
+          adDiv.appendChild(img);
+
+          const adInfoDiv = document.createElement('div');
+          adInfoDiv.classList.add('ad-info');
+
+          const h2 = document.createElement('h2');
+          h2.textContent = ad.title;
+          adInfoDiv.appendChild(h2);
+
+          const pSubtitle = document.createElement('p');
+          pSubtitle.textContent = ad.subtitle;
+          adInfoDiv.appendChild(pSubtitle);
+
+          adDiv.appendChild(adInfoDiv);
+
+          const switchContainer = document.createElement('div');
+          switchContainer.classList.add('switch-container');
+          const switchLabel = document.createElement('label');
+          switchLabel.classList.add('switch');
+          const switchInput = document.createElement('input');
+          switchInput.type = 'checkbox';
+          switchInput.checked = ad.active;
+          const slider = document.createElement('span');
+          slider.classList.add('slider');
+          switchLabel.appendChild(switchInput);
+          switchLabel.appendChild(slider);
+          switchContainer.appendChild(switchLabel);
+          adDiv.appendChild(switchContainer);
+
+          const editBtn = document.createElement('button');
+          editBtn.classList.add('edit-btn');
+          editBtn.textContent = 'تعديل';
+          editBtn.onclick = function() {
+            document.getElementById('adsContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+            console.log('تم النقر على زر التعديل للإعلان:', ad);
+          };
+          adDiv.appendChild(editBtn);
+
+          adsContainer.appendChild(adDiv);
+        });
+      })
+      .catch(error => {
+        console.error('حدث خطأ أثناء جلب البيانات:', error);
+      });
+
+    // استخراج معرف الملف من رابط Google Drive
+    function getDriveFileId(url) {
+      const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        return match[1];
+      } else {
+        console.error('Invalid Google Drive URL:', url);
+        return '';
+      }
+    }
+
+    window.onload = function() {
+      setTimeout(function() {
+        document.querySelector('.loading').style.display = 'none';
+        document.getElementById('adsContainer').style.display = 'block';
+      }, 2000);
+
+      var editButtons = document.getElementsByClassName('edit-btn');
+      for (var i = 0; i < editButtons.length; i++) {
+        editButtons[i].addEventListener('click', function() {
+          document.getElementById('adsContainer').style.display = 'none';
+          document.getElementById('mainContent').style.display = 'flex';
+        });
+      }
+    };
+
+    document.getElementById('saveButton').addEventListener('click', function() {
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('cover').style.display = 'block';
+      document.getElementById('processingMessage').style.display = 'block';
+
+      setTimeout(function() {
+        document.getElementById('cover').style.display = 'none';
+        document.getElementById('processingMessage').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+      }, 2000);
+    });
+
+    function submitAndClearForm() {
+      var adsType = document.getElementById('adsType').value; // الحصول على القيمة المختارة من الـ <select>
+      var requiredInputs = document.querySelectorAll('.form-input[required]');
+      var allFilled = true;
+
+      requiredInputs.forEach(function(input) {
+        if (!input.value.trim()) {
+          allFilled = false;
+        }
+      });
+
+      if (!allFilled) {
+        alert('الرجاء ملء جميع الحقول الإلزامية.');
+        return;
+      }
+
+      var cover = document.getElementById('cover');
+      cover.style.display = 'block';
+
+      var reader = new FileReader();
+      var file = document.getElementById('image_uploads').files[0];
+      var submitButton = document.getElementById('submitButton');
+      var processingMessage = document.getElementById('processingMessage');
+      var successMessage = document.getElementById('successMessage');
+
+      reader.onload = function(){
+        document.getElementById('fileContent').value = reader.result;
+        document.getElementById('filename').value = file.name;
+
+        submitButton.disabled = true;
+        processingMessage.style.display = 'block';
+        uploadForm.style.display = 'none';
+
+        fetch(document.getElementById('uploadForm').action, {
+          method: 'POST',
+          body: new FormData(document.getElementById('uploadForm'))
+        })
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('uploadForm').reset();
+
+          submitButton.disabled = false;
+          processingMessage.style.display = 'none';
+          cover.style.display = 'none';
+          successMessage.style.display = 'block';
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          submitButton.disabled = false;
+          processingMessage.style.display = 'none';
+          cover.style.display = 'none';
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function hideSuccessMessage() {
+      document.getElementById('successMessage').style.display = 'none';
+    }
+
+    function updateImageDisplay() {
+      var preview = document.querySelector('.preview');
+      var file = document.getElementById('image_uploads').files[0];
+      var imageType = /image.*/;
+
+      if (file.type.match(imageType)) {
+        var reader = new FileReader();
+
+        reader.onload = function() {
+          var img = new Image();
+          img.src = reader.result;
+
+          while (preview.firstChild) {
+            preview.removeChild(preview.firstChild);
+          }
+          preview.appendChild(img);
+        };
+
+        reader.readAsDataURL(file);
+      } else {
+        while (preview.firstChild) {
+          preview.removeChild(preview.firstChild);
+        }
+        var para = document.createElement('p');
+        para.textContent = 'الملف المحدد ليس صورة صالحة.';
+        preview.appendChild(para);
+      }
+    }
+  </script>
+</body>
+</html>
