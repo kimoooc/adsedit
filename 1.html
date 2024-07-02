@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>معاينة الإعلانات</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      width: 100%; /* يجعل الحاوية تمتد على الشاشة بالكامل */
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .ad {
+      border-bottom: 1px solid #ddd;
+      padding: 20px 0;
+      position: relative;
+      display: flex; /* تحويل الإعلان إلى عنصر مرن */
+      align-items: center; /* توسيط العناصر داخل الإعلان */
+    }
+    .ad img {
+      max-width: 100px; /* حجم الصورة حسب الحاجة */
+      height: auto;
+      margin-right: 20px; /* تباعد بين الصورة والنصوص */
+    }
+    .ad-info {
+      flex: 1; /* النصوص تمتد لتأخذ المساحة المتبقية */
+    }
+    .ad h2 {
+      margin-top: 0;
+      margin-bottom: 10px; /* تباعد بين العناوين */
+    }
+    .ad p {
+      margin: 5px 0;
+    }
+    .switch-container,
+    .edit-btn {
+      margin-top: 10px; /* تباعد بين الأزرار والإعلانات */
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .switch input {
+      display: none;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .edit-btn {
+      padding: 5px 10px;
+      background-color: #dbdcdd;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 60px;
+      height: 34px;
+      border-radius: 34px;
+      margin-left: 10px; /* تباعد بين الأزرار والإعلانات */
+    }
+    .edit-btn:hover {
+      background-color: #000;
+      color: #dbdcdd;
+    }
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px; /* ارتفاع العنصر المحتوي على الصورة */
+    }
+
+    /* تعديلات للتجاوب مع الشاشات الصغيرة (الهواتف) */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px; /* تقليل التباعد الداخلي للحاوية على الأجهزة الصغيرة */
+      }
+      .ad {
+        flex-direction: column; /* عرض الإعلان بشكل عمودي */
+        align-items: center; /* توسيط العناصر على الشاشات الصغيرة */
+        text-align: center; /* توسيط النصوص في حالة الشاشات الصغيرة */
+      }
+      .ad img {
+        margin-right: 0; /* إزالة التباعد بين الصورة والنصوص */
+        margin-bottom: 10px; /* تباعد بين الصورة والنصوص باتجاه الأسفل */
+      }
+      .switch {
+        margin-top: 10px; /* تباعد بين الأزرار */
+      }
+      .edit-btn {
+        margin-top: 10px; /* تباعد بين الأزرار */
+        margin-left: 0; /* إلغاء التباعد بين الزر والإعلان عندما يكون عرض الشاشة صغيرًا */
+      }
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+      background-color: #f8f9fa;
+    }
+
+    .main-content {
+      display: none; /* Initially hidden */
+    }
+
+    .main-content.visible {
+      display: block; /* Shown when needed */
+    }
+
+    .main-content .column {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .main-content .column.main {
+      flex: 1 1 60%;
+    }
+
+    .main-content .column.secondary {
+      flex: 1 1 30%;
+    }
+
+    @media (max-width: 768px) {
+      .main-content .column.main, .main-content .column.secondary {
+        flex: 1 1 100%;
+      }
+    }
+
+    .form-label {
+      color: #333;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+
+    .form-input {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      text-align: right;
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .form-btn1 {
+      background-color: #f2ab19;
+      color: #080808;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 30%;
+    }
+
+    .form-btn1:hover {
+      background-color: #080808;
+      color: #f2ab19;
+    }
+    
+    .custom-file-upload {
+      border: 1px solid #f2ab19;
+      color: #f2ab19;
+      background-color: #fff;
+      padding: 10px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: inline-block;
+      text-align: center;
+      margin-bottom: 20px;
+      width: 50%;
+    }
+
+    .custom-file-upload:hover {
+      background-color:#f2ab19;
+      color: #080808;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-image {
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+    }
+
+    #cover {
+      display: none;
+      position: fixed;
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(255, 255, 255, 0.8); 
+      z-index: 999;
+    }
+
+    #cover img {
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+    }
+
+    #processingMessage {
+      display: none; 
+      text-align: center; 
+      padding: 20px;
+    }
+
+    #successMessage {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #failureMessage {
+      display: none; 
+      text-align: center; 
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="adsContainer">
+  <h1>قائمة الإعلانات</h1>
+  <!-- سيتم حقاعة التكرار هنا -->
+  <div class="loading" id="loading">
+    <img src="https://i.imgur.com/USI88KX.png" alt="Loading..." class="loading-image">
+  </div>
+</div>
+
+<!-- Main content section for editing an ad -->
+<div class="main-content" id="mainContent">
+  <div class="column main">
+    <h2>تعديل الإعلان</h2>
+    <form id="editForm" >
+      <label for="adsType" class="form-label">نوع الإعلان:</label>
+      <input type="text" id="adsType" class="form-input" name="adsType" readonly>
+      <label for="nama" class="form-label">اسم المنتج:</label>
+      <input type="text" id="nama" class="form-input" name="nama">
+      <label for="product description" class="form-label">وصف المنتج:</label>
+      <input type="text" id="product description" class="form-input" name="product description">
+      <label for="Image" class="form-label">اختر صورة للمنتج:</label>
+      <input type="file" id="image" class="form-input" name="image" accept="image/*">
+      <button type="submit" class="form-btn1" id="editBtn">تعديل</button>
+    </form>
+  </div>
+  <div class="column secondary">
+    <div class="preview">
+      <h2>معاينة الصورة</h2>
+      <img src="" alt="Preview" style="max-width: 100%; height: auto;">
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Fetch data from Google Sheets API
+  fetch('https://sheets.googleapis.com/v4/spreadsheets/1lVbvdEOsFkL9-agAS_EuS2mZn8Wd343Gw8uc8Pe4Bto/values/Dat!A1:G100?key=AIzaSyBhiqVypmyLHYPmqZYtvdSvxEopcLZBdYU')
+    .then(response => response.json())
+    .then(data => {
+      // Extract relevant data from the API response
+      const values = data.values.slice(1); // Ignore the header row
+      const adsData = values.map(row => ({
+        date: row[0],
+        adsType: row[1],
+        imgUrl: row[2],
+        title: row[3],
+        subtitle: row[4],
+        active: row[5] === 'active'
+      }));
+
+      // Select the ads container
+      const adsContainer = document.getElementById('adsContainer');
+      adsContainer.innerHTML = ''; // Clear loading message
+
+      // Populate ads into the ads container
+      adsData.forEach(ad => {
+        const adDiv = document.createElement('div');
+        adDiv.classList.add('ad');
+
+        // Create image element for the ad
+        const img = document.createElement('img');
+        img.src = `https://drive.google.com/thumbnail?id=${getDriveFileId(ad.imgUrl)}`;
+        img.alt = ad.adsType;
+        adDiv.appendChild(img);
+
+        // Create div for ad information
+        const adInfoDiv = document.createElement('div');
+        adInfoDiv.classList.add('ad-info');
+
+        // Create h2 element for title
+        const h2 = document.createElement('h2');
+        h2.textContent = ad.title;
+        adInfoDiv.appendChild(h2);
+
+        // Create p element for subtitle
+        const pSubtitle = document.createElement('p');
+        pSubtitle.textContent = ad.subtitle;
+        adInfoDiv.appendChild(pSubtitle);
+
+        adDiv.appendChild(adInfoDiv);
+
+        // Create switch container for active status
+        const switchContainer = document.createElement('div');
+        switchContainer.classList.add('switch-container');
+        const switchLabel = document.createElement('label');
+        switchLabel.classList.add('switch');
+        const switchInput = document.createElement('input');
+        switchInput.type = 'checkbox';
+        switchInput.checked = ad.active;
+        const slider = document.createElement('span');
+        slider.classList.add('slider');
+        switchLabel.appendChild(switchInput);
+        switchLabel.appendChild(slider);
+        switchContainer.appendChild(switchLabel);
+        adDiv.appendChild(switchContainer);
+
+        // Create edit button
+        const editBtn = document.createElement('button');
+        editBtn.classList.add('edit-btn');
+        editBtn.textContent = 'تعديل';
+        editBtn.onclick = function() {
+          // Show main-content and hide adsContainer
+          document.getElementById('adsContainer').style.display = 'none';
+          document.getElementById('mainContent').style.display = 'block';
+
+          // Populate main-content with selected ad data
+          document.getElementById('adsType').value = ad.adsType;
+          document.getElementById('nama').value = ad.title;
+          document.getElementById('product description').value = ad.subtitle;
+          // You can add more fields as needed
+
+          // Update image preview
+          const imagePreview = document.querySelector('.preview img');
+          imagePreview.src = img.src;
+          imagePreview.alt = ad.adsType;
+        };
+        adDiv.appendChild(editBtn);
+
+        // Append the constructed ad element to adsContainer
+        adsContainer.appendChild(adDiv);
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching data from Google Sheets API:', error);
+    });
+
+  // Function to extract file ID from Google Drive URL
+  function getDriveFileId(url) {
+    const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    if (match && match[1]) {
+      return match[1];
+    } else {
+      console.error('Invalid Google Drive URL:', url);
+      return '';
+    }
+  }
+
+  // Handle form submission (for editing ad)
+  const editForm = document.getElementById('editForm');
+  editForm.addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+    // Add your logic to handle form submission (e.g., update ad data)
+    // Example: You can send an AJAX request to update data in the backend
+    // After successful submission, you might want to show a success message
+    // or reload the ads list.
+    // For demonstration purposes, let's show a success message:
+    const successMessage = document.getElementById('successMessage');
+    successMessage.style.display = 'block';
+    setTimeout(function() {
+      successMessage.style.display = 'none';
+      // Optionally, reload the ads list or perform any other action
+      document.getElementById('adsContainer').style.display = 'block';
+      document.getElementById('mainContent').style.display = 'none';
+    }, 2000); // Hide success message after 2 seconds
+  });
+
+  // Event listener for hiding main-content and showing adsContainer again
+  const backButton = document.getElementById('backButton');
+  backButton.addEventListener('click', function() {
+    document.getElementById('adsContainer').style.display = 'block';
+    document.getElementById('mainContent').style.display = 'none';
+  });
+});
+</script>
+
+<div id="processingMessage">
+  <img src="https://i.imgur.com/USI88KX.png" alt="Processing..." class="loading-image">
+  <p>Processing...</p>
+</div>
+
+<div id="successMessage">
+  <p>تم تحديث الإعلان بنجاح!</p>
+</div>
+
+<div id="failureMessage">
+  <p>فشل في تحديث الإعلان. الرجاء المحاولة مرة أخرى.</p>
+</div>
+
+</body>
+</html>
