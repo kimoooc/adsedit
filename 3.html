@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة الإعلانات وتعديلها</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: right;
+      direction: rtl;
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    .ad {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .ad img {
+      max-width: 150px;
+      height: auto;
+      margin-right: 20px;
+      border-radius: 8px;
+    }
+
+    .ad-info {
+      flex: 1;
+    }
+
+    .ad-info h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #333;
+    }
+
+    .ad-info p {
+      margin: 5px 0;
+      color: #666;
+    }
+
+    .switch-container {
+      margin-left: auto;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    .edit-btn {
+      margin-left: 10px;
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .edit-btn:hover {
+      background-color: #45a049;
+    }
+
+    .main-content {
+      display: none;
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: right;
+      direction: rtl;
+    }
+
+    .preview {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .preview img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    #processingMessage,
+    #successMessage,
+    #failureMessage {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      margin-top: 20px;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="adsContainer">
+  <h1>قائمة الإعلانات</h1>
+  <div class="loading" id="loading">
+    <img src="https://i.imgur.com/USI88KX.png" alt="Loading..." class="loading-image">
+  </div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="column main">
+    <h2>تعديل الإعلان</h2>
+    <form id="editForm">
+      <label for="adsType" class="form-label">نوع الإعلان:</label>
+      <input type="text" id="adsType" class="form-input" name="adsType" readonly>
+      <label for="nama" class="form-label">اسم المنتج:</label>
+      <input type="text" id="nama" class="form-input" name="nama">
+      <label for="productDescription" class="form-label">وصف المنتج:</label>
+      <input type="text" id="productDescription" class="form-input" name="productDescription">
+      <label for="image" class="form-label">اختر صورة للمنتج:</label>
+      <input type="file" id="image" class="form-input" name="image" accept="image/*">
+      <button type="submit" class="form-btn1 edit-btn" id="editBtn">تعديل</button>
+      <button type="button" class="form-btn1 edit-btn" id="backButton">رجوع</button>
+    </form>
+  </div>
+  <div class="column secondary">
+    <div class="preview">
+      <h2>معاينة الصورة</h2>
+      <img src="" alt="Preview" style="max-width: 100%; height: auto;">
+    </div>
+  </div>
+</div>
+
+<div id="processingMessage">
+  <img src="https://i.imgur.com/USI88KX.png" alt="Processing..." class="loading-image">
+  <p>جارٍ المعالجة...</p>
+</div>
+
+<div id="successMessage">
+  <p>تم تحديث الإعلان بنجاح!</p>
+</div>
+
+<div id="failureMessage">
+  <p>فشل في تحديث الإعلان. الرجاء المحاولة مرة أخرى.</p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/1lVbvdEOsFkL9-agAS_EuS2mZn8Wd343Gw8uc8Pe4Bto/values/Dat!A1:G100?key=AIzaSyBhiqVypmyLHYPmqZYtvdSvxEopcLZBdYU';
+
+  fetch(sheetUrl)
+    .then(response => response.json())
+    .then(data => {
+      const values = data.values.slice(1); // Remove header row
+      const adsData = values.map(row => ({
+        date: row[0],
+        adsType: row[1],
+        imgUrl: row[2],
+        title: row[3],
+        subtitle: row[4],
+        active: row[5] === 'active'
+      }));
+
+      const adsContainer = document.getElementById('adsContainer');
+      adsContainer.innerHTML = ''; // Clear loading message
+
+      adsData.forEach(ad => {
+        const adDiv = document.createElement('div');
+        adDiv.classList.add('ad');
+
+        const img = document.createElement('img');
+        img.src = `https://drive.google.com/thumbnail?id=${getDriveFileId(ad.imgUrl)}`;
+        img.alt = ad.adsType;
+        adDiv.appendChild(img);
+
+        const adInfoDiv = document.createElement('div');
+        adInfoDiv.classList.add('ad-info');
+
+        const h2 = document.createElement('h2');
+        h2.textContent = ad.title;
+        adInfoDiv.appendChild(h2);
+
+        const pSubtitle = document.createElement('p');
+        pSubtitle.textContent = ad.subtitle;
+        adInfoDiv.appendChild(pSubtitle);
+
+        adDiv.appendChild(adInfoDiv);
+
+        const switchContainer = document.createElement('div');
+        switchContainer.classList.add('switch-container');
+        const switchLabel = document.createElement('label');
+        switchLabel.classList.add('switch');
+        const switchInput = document.createElement('input');
+        switchInput.type = 'checkbox';
+        switchInput.checked = ad.active;
+        const slider = document.createElement('span');
+        slider.classList.add('slider');
+        switchLabel.appendChild(switchInput);
+        switchLabel.appendChild(slider);
+        switchContainer.appendChild(switchLabel);
+        adDiv.appendChild(switchContainer);
+
+        const editBtn = document.createElement('button');
+        editBtn.classList.add('edit-btn');
+        editBtn.textContent = 'تعديل';
+        editBtn.onclick = function() {
+          document.getElementById('adsType').value = ad.adsType;
+          document.getElementById('nama').value = ad.title;
+          document.getElementById('productDescription').value = ad.subtitle;
+          document.querySelector('.preview img').src = `https://drive.google.com/thumbnail?id=${getDriveFileId(ad.imgUrl)}`;
+          document.getElementById('mainContent').style.display = 'block';
+          document.getElementById('adsContainer').style.display = 'none';
+        };
+        adDiv.appendChild(editBtn);
+
+        adsContainer.appendChild(adDiv);
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+
+  function getDriveFileId(url) {
+    const id = url.match(/[-\w]{25,}/);
+    return id ? id[0] : null;
+  }
+
+  const backButton = document.getElementById('backButton');
+  backButton.onclick = function() {
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('adsContainer').style.display = 'block';
+    document.getElementById('editForm').reset();
+  };
+
+  const editForm = document.getElementById('editForm');
+  editForm.onsubmit = function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('processingMessage').style.display = 'block';
+
+    const adData = {
+      adsType: formData.get('adsType'),
+      nama: formData.get('nama'),
+      productDescription: formData.get('productDescription'),
+      image: formData.get('image')
+    };
+
+    // Simulate API request processing
+    setTimeout(() => {
+      // In a real application, you would make an API call to update the ad data
+      console.log('Simulated API request to update ad data:', adData);
+
+      // Show success message and reset form
+      document.getElementById('processingMessage').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('successMessage').style.display = 'none';
+        document.getElementById('adsContainer').style.display = 'block';
+        editForm.reset();
+      }, 2000);
+    }, 1500);
+  };
+});
+</script>
+
+</body>
+</html>
+
