@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعلانات</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background-color: #f0f0f0;
+      margin: 20px;
+    }
+    .ad {
+      position: relative;
+      color: white;
+      text-align: center;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 728px;
+      margin-bottom: 10px; /* تسافة بين الإعلانات */
+    }
+    .ad-728x90 {
+      height: 90px;
+    }
+    .ad-250x250 {
+      max-width: 250px;
+      height: 250px;
+      aspect-ratio: 1;
+    }
+    .ad-title {
+      font-size: 2vw;
+      font-weight: bold;
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      z-index: 1; /* يجعل العنوان أمام الزرين */
+    }
+    .ad-subtitle {
+      font-size: 1.5vw;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      z-index: 1; /* يجعل العنوان الفرعي أمام الزرين */
+    }
+
+    @media (max-width: 768px) {
+      .ad-title {
+        font-size: 4vw;
+      }
+      .ad-subtitle {
+        font-size: 3vw;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .ad-title {
+        font-size: 5vw;
+      }
+      .ad-subtitle {
+        font-size: 4vw;
+      }
+    }
+
+    .ad-container {
+      position: relative;
+      margin-top: 10px;
+    }
+    .switch-container,
+    .edit-btn {
+      margin-top: 0px;
+    }
+    .switch-container {
+      display: flex;
+      align-items: center;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+      margin-right: 10px;
+    }
+    .switch input {
+      display: none;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .edit-btn {
+      padding: 5px 10px;
+      background-color: #dbdcdd;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 60px;
+      height: 34px;
+      border-radius: 34px;
+    }
+    .edit-btn:hover {
+      background-color: #000;
+      color: #dbdcdd;
+    }
+    .ads-container {
+      display: none; /* يبدأ مخفيًا */
+    }
+    .ads-container.active {
+      display: block; /* عندما يكون مشغلًا */
+    }
+    
+    
+    
+    
+    
+   .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 20px;
+            gap: 20px;
+        }
+
+        .column {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .column.main {
+            flex: 1 1 60%;
+        }
+
+        .column.secondary {
+            flex: 1 1 30%;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .column.main, .column.secondary {
+                flex: 1 1 100%;
+            }
+        }
+
+        .form-label {
+            color: #333;
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .form-input {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            text-align: right;
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-btn1 {
+            background-color: #f2ab19;
+            color: #080808;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 30%;
+        }
+
+        .form-btn1:hover {
+            background-color: #080808;
+            color: #f2ab19;
+        }
+        
+        .custom-file-upload {
+            border: 1px solid #f2ab19;
+            color: #f2ab19;
+            background-color: #fff;
+            padding: 10px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            margin-bottom: 20px;
+            width: 50%;
+        }
+
+        .custom-file-upload:hover {
+            background-color:#f2ab19;
+            color: #080808;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-image {
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        #cover {
+            display: none;
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(255, 255, 255, 0.8); 
+            z-index: 999;
+        }
+
+        #cover img {
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+        }
+
+        #processingMessage {
+            display: none; 
+            text-align: center; 
+            padding: 20px;
+        }
+
+        #successMessage {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .success-buttons button {
+            background-color: #f2ab19;
+            color: #080808;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 30%;
+        }
+
+        .success-buttons button:hover {
+            background-color: #080808;
+            color: #f2ab19;
+        }
+        
+        .preview {
+            color: black;
+            margin: 0px;
+            font-size: 13px;
+        }
+
+        .preview img {
+            max-width: 100%;
+            height: auto;
+        } 
+    
+    
+  </style>
+</head>
+<body>
+
+<script>
+  const sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/1lVbvdEOsFkL9-agAS_EuS2mZn8Wd343Gw8uc8Pe4Bto/values/Dat!A1:G100?key=AIzaSyBhiqVypmyLHYPmqZYtvdSvxEopcLZBdYU';
+
+  function extractDriveId(url) {
+    const regex = /\/d\/(.*?)\/|id=(.*?)(?:&|$)/;
+    const match = url.match(regex);
+    return match ? (match[1] || match[2]) : null;
+  }
+
+  fetch(sheetUrl)
+    .then(response => response.json())
+    .then(data => {
+      const ads = data.values.slice(1); // استبعاد الصف الأول الذي يحتوي على العناوين
+      ads.forEach((ad, index) => {
+        if (index < 2) { // عرض الإعلانين الأولين فقط
+          const adContainer = document.createElement('div');
+          adContainer.classList.add('ad');
+          if (index === 0) {
+            adContainer.classList.add('ad-728x90');
+          } else if (index === 1) {
+            adContainer.classList.add('ad-250x250');
+          }
+
+          const imageUrl = `https://drive.google.com/thumbnail?id=${extractDriveId(ad[2])}`;
+          adContainer.style.backgroundImage = `url('${imageUrl}')`;
+
+          const adTitle = document.createElement('div');
+          adTitle.classList.add('ad-title');
+          adTitle.textContent = ad[3];
+
+          const adSubtitle = document.createElement('div');
+          adSubtitle.classList.add('ad-subtitle');
+          adSubtitle.textContent = ad[4];
+
+          adContainer.appendChild(adTitle);
+          adContainer.appendChild(adSubtitle);
+          document.body.appendChild(adContainer);
+          
+          // إضافة الأزرار لكل إعلان خارج إطاره
+          const switchContainer = document.createElement('div');
+          switchContainer.classList.add('switch-container');
+
+          const switchLabel = document.createElement('label');
+          switchLabel.classList.add('switch');
+
+          const switchInput = document.createElement('input');
+          switchInput.setAttribute('type', 'checkbox');
+          switchInput.checked = ad[6] === 'active'; // تحديد حالة الزر بناءً على قيمة المتغير status
+
+          const switchSpan = document.createElement('span');
+          switchSpan.classList.add('slider');
+
+          switchLabel.appendChild(switchInput);
+          switchLabel.appendChild(switchSpan);
+          switchContainer.appendChild(switchLabel);
+
+          const editBtn = document.createElement('button');
+          editBtn.classList.add('edit-btn');
+          editBtn.textContent = 'تعديل';
+
+          editBtn.addEventListener('click', function() {
+            const adContainers = document.querySelectorAll('.ad');
+            const switchContainers = document.querySelectorAll('.switch-container');
+            const adsContainer1 = document.querySelector('.ads1');
+            const adsContainer2 = document.querySelector('.ads2');
+
+            adContainers.forEach(ad => ad.style.display = 'none');
+            switchContainers.forEach(switchCont => switchCont.style.display = 'none');
+
+            if (index === 0) {
+              adsContainer1.style.display = 'block';
+              adsContainer2.style.display = 'none';
+            } else if (index === 1) {
+              adsContainer1.style.display = 'none';
+              adsContainer2.style.display = 'block';
+            }
+          });
+
+          switchContainer.appendChild(editBtn);
+
+          document.body.appendChild(switchContainer);
+        }
+      });
+    })
+    .catch(error => console.error('Error fetching the data:', error));
+    
+    
+    
+    
+    
+     function submitAndClearForm() {
+            var adsType = document.getElementById('adsType').value; // الحصول على القيمة المختارة من الـ <select>
+            var requiredInputs = document.querySelectorAll('.form-input[required]');
+            var allFilled = true;
+
+            requiredInputs.forEach(function(input) {
+                if (!input.value.trim()) {
+                    allFilled = false;
+                }
+            });
+
+            if (!allFilled) {
+                alert('الرجاء ملء جميع الحقول الإلزامية.');
+                return;
+            }
+
+            var cover = document.getElementById('cover');
+            cover.style.display = 'block';
+
+            var reader = new FileReader();
+            var file = document.getElementById('image_uploads').files[0];
+            var submitButton = document.getElementById('submitButton');
+            var processingMessage = document.getElementById('processingMessage');
+            var successMessage = document.getElementById('successMessage');
+
+            reader.onload = function(){
+                document.getElementById('fileContent').value = reader.result;
+                document.getElementById('filename').value = file.name;
+
+                submitButton.disabled = true;
+                processingMessage.style.display = 'block';
+                uploadForm.style.display = 'none';
+
+                fetch(document.getElementById('uploadForm').action, {
+                    method: 'POST',
+                    body: new FormData(document.getElementById('uploadForm'))
+                })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('uploadForm').reset();
+
+                    submitButton.disabled = false;
+                    processingMessage.style.display = 'none';
+                    cover.style.display = 'none';
+                    successMessage.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    submitButton.disabled = false;
+                    processingMessage.style.display = 'none';
+                    cover.style.display = 'none';
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function hideSuccessMessage() {
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function updateImageDisplay() {
+            var preview = document.querySelector('.preview');
+            var file = document.getElementById('image_uploads').files[0];
+            var imageType = /image.*/;
+
+            if (file.type.match(imageType)) {
+                var reader = new FileReader();
+
+                reader.onload = function() {
+                    var img = new Image();
+                    img.src = reader.result;
+
+                    while (preview.firstChild) {
+                        preview.removeChild(preview.firstChild);
+                    }
+                    preview.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                while (preview.firstChild) {
+                    preview.removeChild(preview.firstChild);
+                }
+                var para = document.createElement('p');
+                para.textContent = 'الملف المحدد ليس صورة صالحة.';
+                preview.appendChild(para);
+            }
+        } 
+    
+    
+    
+    
+    
+</script>
+
+<!-- عناصر الإعلانات المخفية -->
+<div class="ads-container ads1">
+
+<div class="main-content">
+        <div class="column main">
+            <form id="uploadForm" action="https://script.google.com/macros/s/AKfycby89lAVORRjYGseorTlOZXiH9w0Xv57K_Yf4BRrRJAK8Re5TBby6lNUqaI22PSTvzZS/exec" method="POST" style="color: white;margin-left: 5%;margin-right: 5%;margin-bottom: 60px;margin-top: 50px;text-align: right;z-index: 10;">
+                <input type="hidden" value="" name="fileContent" id="fileContent">
+                <input type="hidden" value="" name="filename" id="filename">
+                <div class="input-box">
+                    <label for="adsType" class="form-label"></label>
+                    <select id="adsType" name="ads" class="form-input" required>
+                        <option value="ads 1">ads 1</option>
+                        
+                    </select>
+                </div>
+
+                <div class="input-box">
+                    <label for="nama" class="form-label">العنوان الرئيسي</label>
+                    <input type="text" id="nama" name="Title" class="form-input" placeholder="" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="nama" class="form-label">العنوان الفرعي</label>
+                    <input type="text" id="nama" name="Subtitle" class="form-input" placeholder="" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="image_uploads" class="custom-file-upload">
+                        اختر صورة الغلاف
+                    </label>
+                    <input type="file" id="image_uploads" name="image_uploads" accept=".jpg, .jpeg, .png" onchange="updateImageDisplay();" style="display: none;" required />
+                    <div class="preview">
+                        <p style="color: black;margin: 0px;font-size: 13px;">الصورة يجب أن تكون بصيغة PNG أو JPG</p>
+                    </div>
+                </div>
+
+                <div class="button" style="width: 100%;">
+                    <button class="form-btn1" type="button" id="submitButton" onclick="submitAndClearForm();">إرسال</button>
+                </div>
+            </form>
+
+            <div id="cover">
+                <img src="https://wa022.github.io/6/loading.gif" alt="Loading" class="loading-image">
+            </div>
+
+            <div id="processingMessage">
+                <p>جارٍ معالجة البيانات...</p>
+            </div>
+
+            <div id="successMessage">
+                <p>تم إرسال البيانات بنجاح!</p>
+                <div class="success-buttons">
+                    <button class="form-btn1" type="button" onclick="hideSuccessMessage();">إغلاق</button>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+
+</div>
+
+<div class="ads-container ads2">
+
+<div class="main-content">
+        <div class="column main">
+            <form id="uploadForm" action="https://script.google.com/macros/s/AKfycby89lAVORRjYGseorTlOZXiH9w0Xv57K_Yf4BRrRJAK8Re5TBby6lNUqaI22PSTvzZS/exec" method="POST" style="color: white;margin-left: 5%;margin-right: 5%;margin-bottom: 60px;margin-top: 50px;text-align: right;z-index: 10;">
+                <input type="hidden" value="" name="fileContent" id="fileContent">
+                <input type="hidden" value="" name="filename" id="filename">
+                <div class="input-box">
+                    <label for="adsType" class="form-label"></label>
+                    <select id="adsType" name="ads" class="form-input" required>
+                        <option value="ads 1">ads 2</option>
+                        
+                    </select>
+                </div>
+
+                <div class="input-box">
+                    <label for="nama" class="form-label">العنوان الرئيسي</label>
+                    <input type="text" id="nama" name="Title" class="form-input" placeholder="" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="nama" class="form-label">العنوان الفرعي</label>
+                    <input type="text" id="nama" name="Subtitle" class="form-input" placeholder="" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="image_uploads" class="custom-file-upload">
+                        اختر صورة الغلاف
+                    </label>
+                    <input type="file" id="image_uploads" name="image_uploads" accept=".jpg, .jpeg, .png" onchange="updateImageDisplay();" style="display: none;" required />
+                    <div class="preview">
+                        <p style="color: black;margin: 0px;font-size: 13px;">الصورة يجب أن تكون بصيغة PNG أو JPG</p>
+                    </div>
+                </div>
+
+                <div class="button" style="width: 100%;">
+                    <button class="form-btn1" type="button" id="submitButton" onclick="submitAndClearForm();">إرسال</button>
+                </div>
+            </form>
+
+            <div id="cover">
+                <img src="https://wa022.github.io/6/loading.gif" alt="Loading" class="loading-image">
+            </div>
+
+            <div id="processingMessage">
+                <p>جارٍ معالجة البيانات...</p>
+            </div>
+
+            <div id="successMessage">
+                <p>تم إرسال البيانات بنجاح!</p>
+                <div class="success-buttons">
+                    <button class="form-btn1" type="button" onclick="hideSuccessMessage();">إغلاق</button>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+
+
+</div>
+
+</body>
+</html>
