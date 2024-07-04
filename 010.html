@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعلانات</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background-color: #f0f0f0;
+      margin: 20px;
+    }
+    .ad {
+      position: relative;
+      color: white;
+      text-align: center;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 728px;
+      margin-bottom: 10px; /* مسافة بين الإعلانات */
+    }
+    .ad-728x90 {
+      height: 90px;
+    }
+    .ad-250x250 {
+      max-width: 250px;
+      height: 250px;
+      aspect-ratio: 1;
+    }
+    .ad-title {
+      font-size: 2vw;
+      font-weight: bold;
+      position: absolute;
+      bottom: 40%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      z-index: 1; /* يجعل العنوان أمام الزرين */
+    }
+    .ad-728x90 .ad-title {
+      top: 20%;
+      left: 90%;
+      transform: translateX(-100%);
+      text-align: right;
+      width: 100%;
+    }
+    .ad-subtitle {
+      font-size: 1.5vw;
+      position: absolute;
+      top: 65%;
+      bottom: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      z-index: 1; /* يجعل العنوان الفرعي أمام الزرين */
+    }
+    .ad-728x90 .ad-subtitle {
+      top: 50%;
+      left: 90%;
+      transform: translateX(-100%);
+      text-align: right;
+      width: 100%;
+    }
+    @media (max-width: 768px) {
+    
+      .ad-title {
+        font-size: 4vw;
+      }
+      .ad-subtitle {
+        font-size: 3vw;
+      }
+    }
+    @media (max-width: 480px) {
+   
+      .ad-title {
+        font-size: 5vw;
+      }
+      .ad-subtitle {
+        font-size: 4vw;
+      }
+    }
+    .switch-container,
+    .edit-btn {
+      margin-top: 0px;
+    }
+    .switch-container {
+      display: flex;
+      align-items: center;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+      margin-right: 10px;
+    }
+    .switch input {
+      display: none;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .edit-btn {
+      padding: 5px 10px;
+      background-color: #dbdcdd;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      width: 60px;
+      height: 34px;
+      border-radius: 34px;
+    }
+    .edit-btn:hover {
+      background-color: #000;
+      color: #dbdcdd;
+    }
+    .ads-container {
+      display: none; /* يبدأ مخفيًا */
+    }
+    .ads-container.active {
+      display: block; /* عندما يكون مشغلًا */
+    }
+    .ad-button {
+      position: absolute;
+      bottom: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #dbdcdd;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      width: 60px;
+      padding: 10px 20px;
+      border-radius: 34px;
+      text-decoration: none;
+      z-index: 1; /* يجعل الزر أمام جميع العناصر */
+    }
+    .ad-728x90 .ad-button {
+      left: 2%;
+      bottom: 5%;
+      transform: none;
+      font-size: 3vw;
+      width: 10vw;
+      
+    }
+    .ad-button:hover {
+      background-color: #45a049;
+    }
+    
+    
+    
+    
+        .form-label {
+        color: #333;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .form-input {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        text-align: right;
+        width: calc(100% - 20px);
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .form-btn1 {
+        background-color: #f2ab19;
+        color: #080808;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        width: 30%;
+    }
+
+    .form-btn1:hover {
+        background-color: #080808;
+        color: #f2ab19;
+    }
+
+    .custom-file-upload {
+        border: 1px solid #f2ab19;
+        color: #f2ab19;
+        background-color: #fff;
+        padding: 10px 20px;
+        border-radius: 14px;
+        cursor: pointer;
+        display: inline-block;
+        text-align: center;
+        margin-bottom: 20px;
+        width: 50%;
+    }
+
+    .custom-file-upload:hover {
+        background-color: #f2ab19;
+        color: #080808;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-image {
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+
+    #cover {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 999;
+    }
+
+    #cover img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    #processingMessage {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+
+    #successMessage {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .success-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .success-buttons button {
+        background-color: #f2ab19;
+        color: #080808;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        width: 30%;
+    }
+
+    .success-buttons button:hover {
+        background-color: #080808;
+        color: #f2ab19;
+    }
+
+    .preview {
+        color: black;
+        margin: 0px;
+        font-size: 13px;
+    }
+
+    .preview img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    
+  </style>
+</head>
+<body>
+
+<script>
+  const sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/1lVbvdEOsFkL9-agAS_EuS2mZn8Wd343Gw8uc8Pe4Bto/values/Dat!A1:H100?key=AIzaSyBhiqVypmyLHYPmqZYtvdSvxEopcLZBdYU';
+
+  function extractDriveId(url) {
+    const regex = /\/d\/(.*?)\/|id=(.*?)(?:&|$)/;
+    const match = url.match(regex);
+    return match ? (match[1] || match[2]) : null;
+  }
+
+  fetch(sheetUrl)
+    .then(response => response.json())
+    .then(data => {
+      const ads = data.values.slice(1); // استبعاد الصف الأول الذي يحتوي على العناوين
+      ads.forEach((ad, index) => {
+        if (index < 2) { // عرض الإعلانين الأولين فقط
+          const adContainer = document.createElement('div');
+          adContainer.classList.add('ad');
+          if (index === 0) {
+            adContainer.classList.add('ad-728x90');
+          } else if (index === 1) {
+            adContainer.classList.add('ad-250x250');
+          }
+
+          const imageUrl = `https://drive.google.com/thumbnail?id=${extractDriveId(ad[2])}`;
+          adContainer.style.backgroundImage = `url('${imageUrl}')`;
+
+          const adTitle = document.createElement('div');
+          adTitle.classList.add('ad-title');
+          adTitle.textContent = ad[3];
+
+          const adSubtitle = document.createElement('div');
+          adSubtitle.classList.add('ad-subtitle');
+          adSubtitle.textContent = ad[4];
+
+          const adButton = document.createElement('a');
+          adButton.classList.add('ad-button');
+          adButton.textContent = ad[6];
+          adButton.href = ad[7];
+          adButton.target = '_blank';
+
+          adContainer.appendChild(adTitle);
+          adContainer.appendChild(adSubtitle);
+          adContainer.appendChild(adButton);
+          document.body.appendChild(adContainer);
+          
+          // إضافة الأزرار لكل إعلان خارج إطاره
+          const switchContainer = document.createElement('div');
+          switchContainer.classList.add('switch-container');
+
+          const switchLabel = document.createElement('label');
+          switchLabel.classList.add('switch');
+
+          const switchInput = document.createElement('input');
+          switchInput.setAttribute('type', 'checkbox');
+          switchInput.checked = ad[5] === 'active'; // تحديد حالة الزر بناءً على قيمة المتغير status
+
+          const switchSpan = document.createElement('span');
+          switchSpan.classList.add('slider');
+
+          switchLabel.appendChild(switchInput);
+          switchLabel.appendChild(switchSpan);
+          switchContainer.appendChild(switchLabel);
+
+          const editBtn = document.createElement('button');
+          editBtn.classList.add('edit-btn');
+          editBtn.textContent = 'تعديل';
+
+          editBtn.addEventListener('click', function() {
+            const adContainers = document.querySelectorAll('.ad');
+            const switchContainers = document.querySelectorAll('.switch-container');
+            const adsContainer1 = document.querySelector('.ads1');
+            const adsContainer2 = document.querySelector('.ads2');
+
+            adContainers.forEach(ad => ad.style.display = 'none');
+            switchContainers.forEach(switchCont => switchCont.style.display = 'none');
+
+            if (index === 0) {
+              adsContainer1.style.display = 'block';
+              adsContainer2.style.display = 'none';
+            } else if (index === 1) {
+              adsContainer1.style.display = 'none';
+              adsContainer2.style.display = 'block';
+            }
+          });
+
+          switchContainer.appendChild(editBtn);
+
+          document.body.appendChild(switchContainer);
+        }
+      });
+    })
+    .catch(error => console.error('Error fetching the data:', error));
+    
+    
+    
+    
+    
+    
+        function submitAndClearForm(formId, fileContentId, filenameId, submitButtonId, processingMessageId, successMessageId) {
+        var form = document.getElementById(formId);
+        var fileContent = document.getElementById(fileContentId);
+        var filename = document.getElementById(filenameId);
+        var submitButton = document.getElementById(submitButtonId);
+        var processingMessage = document.getElementById(processingMessageId);
+        var successMessage = document.getElementById(successMessageId);
+
+        var requiredInputs = form.querySelectorAll('.form-input[required]');
+        var allFilled = true;
+
+        requiredInputs.forEach(function(input) {
+            if (!input.value.trim()) {
+                allFilled = false;
+            }
+        });
+
+        if (!allFilled) {
+            alert('الرجاء ملء جميع الحقول الإلزامية.');
+            return;
+        }
+
+        var cover = document.getElementById('cover');
+        cover.style.display = 'block';
+
+        var reader = new FileReader();
+        var file = form.querySelector('input[type="file"]').files[0];
+
+        reader.onload = function() {
+            fileContent.value = reader.result;
+            filename.value = file.name;
+
+            submitButton.disabled = true;
+            processingMessage.style.display = 'block';
+            form.style.display = 'none';
+
+            fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form)
+                })
+                .then(response => response.text())
+                .then(data => {
+                    form.reset();
+
+                    submitButton.disabled = false;
+                    processingMessage.style.display = 'none';
+                    cover.style.display = 'none';
+                    successMessage.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    submitButton.disabled = false;
+                    processingMessage.style.display = 'none';
+                    cover.style.display = 'none';
+                });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function hideSuccessMessage(successMessageId) {
+        var successMessage = document.getElementById(successMessageId);
+        successMessage.style.display = 'none';
+    }
+
+    function updateImageDisplay(previewId, inputId) {
+        var preview = document.getElementById(previewId);
+        var file = document.getElementById(inputId).files[0];
+        var imageType = /image.*/;
+
+        if (file.type.match(imageType)) {
+            var reader = new FileReader();
+
+            reader.onload = function() {
+                var img = new Image();
+                img.src = reader.result;
+
+                while (preview.firstChild) {
+                    preview.removeChild(preview.firstChild);
+                }
+                preview.appendChild(img);
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            while (preview.firstChild) {
+                preview.removeChild(preview.firstChild);
+            }
+            var para = document.createElement('p');
+            para.textContent = 'الملف المحدد ليس صورة صالحة.';
+            preview.appendChild(para);
+        }
+    }
+    
+    
+    
+</script>
+
+<!-- عناصر الإعلانات المخفية -->
+
+<div id="cover">
+    <img src="https://i.ibb.co/J2TdNLT/loading.gif" alt="Loading" class="loading-image">
+</div>
+
+
+
+<div class="ads-container ads1">
+ 
+ 
+ <form id="uploadForm1" action="https://script.google.com/macros/s/AKfycby89lAVORRjYGseorTlOZXiH9w0Xv57K_Yf4BRrRJAK8Re5TBby6lNUqaI22PSTvzZS/exec" method="POST" style="color: white; margin-left: 5%; margin-right: 5%; margin-bottom: 60px; margin-top: 50px; text-align: right; z-index: 10;">
+            <input type="hidden" value="" name="fileContent" id="fileContent1">
+            <input type="hidden" value="" name="filename" id="filename1">
+            <div class="input-box">
+                <input type="hidden" id="adsType1" name="ads" value="ads 1">
+            </div>
+            <div class="input-box">
+                <label for="title1" class="form-label">العنوان الرئيسي</label>
+                <input type="text" id="title1" name="Title" class="form-input" placeholder="" required>
+            </div>
+            <div class="input-box">
+                <label for="subtitle1" class="form-label">العنوان الفرعي</label>
+                <input type="text" id="subtitle1" name="Subtitle" class="form-input" placeholder="" required>
+            </div>
+            <div class="input-box">
+                <label for="image_uploads1" class="custom-file-upload">اختر صورة الغلاف</label>
+                <input type="file" id="image_uploads1" name="image_uploads" accept=".jpg, .jpeg, .png" onchange="updateImageDisplay('preview1', 'image_uploads1');" style="display: none;" required />
+                
+                <div class="input-box">
+                <label for="BtnText" class="form-label">النص في الزر</label>
+                <input type="text" id="BtnText" name="BtnText" class="form-input" placeholder="" required>
+            </div>
+                
+                  <div class="input-box">
+                <label for="BtnUrl" class="form-label">الرابط المرتبط بالزر</label>
+                <input type="text" id="BtnUrl" name="BtnUrl" class="form-input" placeholder="" required>
+            </div>
+            
+                <div class="preview" id="preview1">
+                    <p style="color: black; margin: 0px; font-size: 13px;">لا يوجد ملف محدد</p>
+                </div>
+            </div>
+            <button type="button" onclick="submitAndClearForm('uploadForm1', 'fileContent1', 'filename1', 'submitButton1', 'processingMessage1', 'successMessage1');" id="submitButton1" class="form-btn1">إرسال الإعلان</button>
+            <div id="processingMessage1" style="text-align: center; display: none;">
+                <img src="https://i.ibb.co/YQy1h5Z/Processing.gif" alt="Processing" class="loading-image">
+                <p>جارٍ معالجة الطلب ...</p>
+            </div>
+            <div id="successMessage1" style="text-align: center; display: none;">
+                <p>تم إرسال الإعلان بنجاح!</p>
+                <div class="success-buttons">
+                    <button type="button" onclick="hideSuccessMessage('successMessage1');" class="form-btn1">إغلاق</button>
+                </div>
+            </div>
+        </form>
+ 
+ 
+</div>
+
+<div class="ads-container ads2">
+ 
+ 
+ 
+ <form id="uploadForm2" action="https://script.google.com/macros/s/AKfycby89lAVORRjYGseorTlOZXiH9w0Xv57K_Yf4BRrRJAK8Re5TBby6lNUqaI22PSTvzZS/exec" method="POST" style="color: white; margin-left: 5%; margin-right: 5%; margin-bottom: 60px; margin-top: 50px; text-align: right; z-index: 10;">
+    <input type="hidden" value="" name="fileContent" id="fileContent2">
+    <input type="hidden" value="" name="filename" id="filename2">
+    <div class="input-box">
+        <input type="hidden" id="adsType2" name="ads" value="ads 2">
+    </div>
+    <div class="input-box">
+        <label for="title2" class="form-label">العنوان الرئيسي</label>
+        <input type="text" id="title2" name="Title" class="form-input" placeholder="" required>
+    </div>
+    <div class="input-box">
+        <label for="subtitle2" class="form-label">العنوان الفرعي</label>
+        <input type="text" id="subtitle2" name="Subtitle" class="form-input" placeholder="" required>
+    </div>
+    <div class="input-box">
+        <label for="image_uploads2" class="custom-file-upload">اختر صورة الغلاف</label>
+        <input type="file" id="image_uploads2" name="image_uploads" accept=".jpg, .jpeg, .png" onchange="updateImageDisplay('preview2', 'image_uploads2');" style="display: none;" required />
+        <div class="preview" id="preview2">
+            <p style="color: black; margin: 0px; font-size: 13px;">لا يوجد ملف محدد</p>
+        </div>
+    </div>
+    <button type="button" onclick="submitAndClearForm('uploadForm2', 'fileContent2', 'filename2', 'submitButton2', 'processingMessage2', 'successMessage2');" id="submitButton2" class="form-btn1">إرسال الإعلان</button>
+    <div id="processingMessage2" style="text-align: center; display: none;">
+        <img src="https://i.ibb.co/YQy1h5Z/Processing.gif" alt="Processing" class="loading-image">
+        <p>جارٍ معالجة الطلب ...</p>
+    </div>
+    <div id="successMessage2" style="text-align: center; display: none;">
+        <p>تم إرسال الإعلان بنجاح!</p>
+        <div class="success-buttons">
+            <button type="button" onclick="hideSuccessMessage('successMessage2');" class="form-btn1">إغلاق</button>
+        </div>
+    </div>
+</form>
+
+ 
+ 
+ 
+</div>
+
+</body>
+</html>
